@@ -87,19 +87,20 @@ def graph(request):
     for g in return_value['result']:
         item_att = {}
         his_items = []
-        for i in range(0, len(g['gitems'])):
-            g_item = g['gitems'][i]
-            h_item = g['items'][i]
-            g_item['name'] = h_item['name']
-            g_item['key'] = h_item['key_']
-            g_item['items'] = []
-            if h_item['value_type'] not in item_att:
-                item_att[h_item['value_type']] = [h_item['itemid']]
-            else:
-                values = item_att[h_item['value_type']]
-                values.append(h_item['itemid'])
-                item_att[h_item['value_type']] = values
-        
+        for g_item in g['gitems']:
+	        for h_item in g['items']:
+			    if int(g_item['itemid']) == int(h_item['itemid']):
+				    g_item['name'] = h_item['name']
+					g_item['key'] = h_item['key_']
+					g_item['units'] = h_item['units']
+					g_item['items'] = []
+					if h_item['value_type'] not in item_att:
+						item_att[h_item['value_type']] = [h_item['itemid']]
+					else:
+						values = item_att[h_item['value_type']]
+						values.append(h_item['itemid'])
+						item_att[h_item['value_type']] = values			  
+
         for value_type in item_att.keys():
             item_para['history'] = int(value_type)
             item_para['itemids'] = item_att[value_type]

@@ -108,7 +108,7 @@ class ZabbixApi(object):
 
     def get_graph(self, params):
         params['selectGraphItems'] = ["gitemid", "itemid", "color"]
-        params['selectItems'] = ['name', 'key_', 'value_type']
+        params['selectItems'] = ['name', 'key_', 'value_type', 'units']
         params['output'] = ["name", "graphtype"]
         return self.__get_data("graph.get", params)
 
