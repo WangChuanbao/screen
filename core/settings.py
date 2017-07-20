@@ -79,10 +79,10 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'monitor',
-        'USER': 'root',
-        'PASSWORD': 'zhangjian',
-        'HOST': '10.10.10.16',
+        'NAME': 'htrdmonitor',
+        'USER': 'htrd',
+        'PASSWORD': 'htrd',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
@@ -166,7 +166,7 @@ CHANNEL_LAYERS = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/5',
+        'LOCATION': 'redis://127.0.0.1:6379',
         'TIMEOUT': 60 * 60 * 23,
         'KEY_PREFIX': 'zbx',
         "OPTIONS": {
@@ -177,12 +177,12 @@ CACHES = {
 
 UDP = {
     "HOST": '',
-    "PORT": 7788,
-    "BUF_SIZE": 1024 * 24,
+    "PORT": 10053,
+    "BUF_SIZE": 1024 * 34,
 }
 
 SERVER_MYSQL = {
-    'HOST': '10.10.10.11',
+    'HOST': '127.0.0.1',
     'USER': 'htrd',
     'PASSWD': 'htrd',
     'DB': 'htrdmonitor',
@@ -191,7 +191,7 @@ SERVER_MYSQL = {
 }
 
 HISTORY_MYSQL = {
-    'HOST': '10.10.10.11',
+    'HOST': '192.168.103.114',
     'USER': 'htrd',
     'PASSWD': 'htrd',
     'DB': 'htrdmonitor',

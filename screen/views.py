@@ -79,45 +79,60 @@ def graph(request):
     return_value = zbx_api.get_graph(para)
     if not para.has_key('graphids'):
         return render(return_value)
-    
-    return_value = json.loads(return_value)
-    if not return_value.has_key('result'):
-        return render(json.dumps(return_value))
 
+    return_value = json.loads(return_value)
     for g in return_value['result']:
         item_att = {}
         his_items = []
         for g_item in g['gitems']:
-	        for h_item in g['items']:
-			    if int(g_item['itemid']) == int(h_item['itemid']):
-				    g_item['name'] = h_item['name']
-					g_item['key'] = h_item['key_']
-					g_item['units'] = h_item['units']
-					g_item['items'] = []
-					if h_item['value_type'] not in item_att:
-						item_att[h_item['value_type']] = [h_item['itemid']]
-					else:
-						values = item_att[h_item['value_type']]
-						values.append(h_item['itemid'])
-						item_att[h_item['value_type']] = values			  
+            for h_item in g['items']:
+                if int(g_item['itemid']) == int(h_item['itemid']):
+                    name = h_item['name']
+                    key_ = h_item['key_']
+                    if '$' in name:
+                        index_from = key_.index('[')
+                        index_till = key_.index(']')
+                        k = key_[index_from+1:index_till]
+                        k_args = k.split(',')
+                        for i in range(0,len(k_args)):
+                            mark = '$'+str(i+1)
+                            if mark in name:
+                                name = name.replace(mark, k_args[i])
+                    g_item['name'] = name
+                    g_item['key'] = key_
+                    g_item['units'] = h_item['units']
+                    g_item['items'] = []
+                    if h_item['value_type'] not in item_att:
+                        item_att[h_item['value_type']] = [h_item['itemid']]
+                    else:
+                        values = item_att[h_item['value_type']]
+                        values.append(h_item['itemid'])
+                        item_att[h_item['value_type']] = values
 
         for value_type in item_att.keys():
-            item_para['history'] = int(value_type)
+            item_para['history'] = value_type
             item_para['itemids'] = item_att[value_type]
-            global his_items
-            print(item_para)
             #his_items = json.loads(zbx_api.get_history(item_para))['result']
-            his_items = zbx_api.get_graph_history(item_para)            
+            his_items = zbx_api.get_graph_history(item_para)
 
+        i = 0
+        indexs = []
         for g_item in g['gitems']:
             for his_item in his_items:
                 if int(his_item['itemid']) == int(g_item['itemid']):
                     items = g_item['items']
                     items.append(his_item)
                     g_item['items'] = items
-        g.pop('items') 
+            if g_item['items'] == []:          
+                indexs.append(i)
+            i += 1
 
-    return render(json.dumps(return_value)) 
+        indexs.sort(reverse=True)
+        for index in indexs: 
+            g['gitems'].pop(index)
+
+        g.pop('items')
+    return render(json.dumps(return_value))
 
 
 def follow_list(request):

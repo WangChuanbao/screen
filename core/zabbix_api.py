@@ -9,24 +9,22 @@ from django.core.cache import cache
 
 class ZabbixApi(object):
 
-    url = 'http://10.10.10.11/htrd/api_jsonrpc.php'
+    url = 'http://127.0.0.1:8888/htrd/api_jsonrpc.php'
     header = {'content-type': 'application/json'}
     auth = None
     auth_token = None
     auth_name = 'Admin'
-    auth_password = 'zabbix'
+    auth_password = 'yinheqihuo'
 
     def __init__(self):
         if cache.has_key("auth_token"): 
             self.auth_token = cache.get("auth_token")
-            print('------' + self.auth_token)
         else: 
             self.auth = self.get_login({
                     "user": self.auth_name,
                     "password": self.auth_password
                 })
             self.auth_token = json.loads(self.auth)['result']
-            print('=======' + self.auth_token)
             cache.add("auth_token", self.auth_token)
 
     def get_login(self, params):
@@ -38,8 +36,6 @@ class ZabbixApi(object):
     def get_history(self, params):
         params["sortfield"] = "clock"
         params["sortorder"] = "DESC"
-        # params['limit'] = 10
-        print(params)
         return self.__get_data("history.get", params)
 
     def get_group(self):
@@ -109,6 +105,7 @@ class ZabbixApi(object):
     def get_graph(self, params):
         params['selectGraphItems'] = ["gitemid", "itemid", "color"]
         params['selectItems'] = ['name', 'key_', 'value_type', 'units']
+        params['selectHosts'] = ['name']
         params['output'] = ["name", "graphtype"]
         return self.__get_data("graph.get", params)
 
@@ -167,11 +164,10 @@ class ZabbixApi(object):
         count = (cur.fetchone()['count(*)'])
         mod = 1 if count < limit else count / limit
 
-        sql = sql + ' order by clock desc) as t where t.i MOD ' + str(mod) + '=0;'
+        sql = sql + ' order by clock asc) as t where t.i MOD ' + str(mod) + '=0;'
         cur.execute(sql)
         result = cur.fetchall()
         conn.close()
-        print result
         return result
 
     def get_graph_history(self, params):
@@ -195,7 +191,7 @@ class ZabbixApi(object):
                 return response
 
         for itemid in itemids:
-            response = response + self.select_mysql(0, itemid, time_from, time_till, item_type)
             response = response + self.select_mysql(1, itemid, time_from, time_till, item_type)
+            response = response + self.select_mysql(0, itemid, time_from, time_till, item_type)
 
         return response
